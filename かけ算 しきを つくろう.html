@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>かけ算 しきを つくろう</title>
+<style>
+:root{--bg:#f3f8ec;--card:#fff;--ink:#2b3a22;--sub:#6b7a5f;--main:#e8532f;--ok:#2e9e4f;--ng:#d6402a;--line:#cfe0bd;--plate:#fdfcf8;--plateline:#e3dfd2;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d241a;--card:#283224;--ink:#eef4e6;--sub:#a9b89c;--line:#3d4b36;--plate:#e9e5d8;--plateline:#bdb8a6}}
+:root[data-theme="dark"]{--bg:#1d241a;--card:#283224;--ink:#eef4e6;--sub:#a9b89c;--line:#3d4b36;--plate:#e9e5d8;--plateline:#bdb8a6}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Maru Gothic ProN","Zen Maru Gothic","Yu Gothic",system-ui,sans-serif;font-size:18px}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+h1{font-size:20px;margin:0}
+.score{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:6px 14px;text-align:center;line-height:1.2}
+.score b{font-size:28px;color:var(--main)}
+.score small{display:block;font-size:12px;color:var(--sub)}
+.stats{display:flex;gap:8px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:16px;margin-top:14px}
+.talk{font-size:19px;line-height:1.6;margin:0 0 10px}
+.talk em{font-style:normal;font-weight:700;color:var(--main);font-size:24px}
+.plates{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:6px 0}
+.plate{position:relative;width:clamp(78px,22vw,104px);aspect-ratio:1;border-radius:50%;background:var(--plate);border:3px solid var(--plateline);box-shadow:inset 0 0 0 6px rgba(0,0,0,.03)}
+.plate span{position:absolute;transform:translate(-50%,-50%);font-size:clamp(18px,5.2vw,26px);line-height:1}
+.shiki{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:28px;font-weight:700;flex-wrap:nowrap}
+.shiki{align-items:flex-end}.shiki>span,.shiki>label{padding-bottom:12px}
+.col{display:flex;flex-direction:column;align-items:center;gap:6px}
+.bub{font-style:normal;font-size:13px;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap;color:#3b3320}
+.b1{background:#cfe6f7}.b2{background:#fbd5d5}.b3{background:#fbe6b8}
+.shiki label{font-size:18px;margin-right:4px;color:var(--main)}
+input{width:68px;height:60px;font:inherit;font-size:30px;text-align:center;border:3px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}
+input:focus{outline:3px solid var(--main);outline-offset:1px;border-color:var(--main)}
+.btns{display:flex;justify-content:center;gap:10px;margin-top:16px}
+button{font:inherit;font-weight:700;border:0;border-radius:14px;padding:12px 26px;background:var(--main);color:#fff;cursor:pointer}
+button.alt{background:transparent;color:var(--sub);border:2px solid var(--line)}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+button:disabled{opacity:.4;cursor:default}
+.msg{min-height:3.2em;margin-top:12px;text-align:center;font-weight:700;line-height:1.5}
+.msg.ok{color:var(--ok)}.msg.ng{color:var(--ng)}
+.set{display:flex;gap:6px;justify-content:center;align-items:center;font-size:14px;color:var(--sub);margin-top:10px;flex-wrap:wrap}
+.set button{padding:4px 12px;font-size:14px;background:transparent;border:2px solid var(--line);color:var(--ink)}
+.set button.on{background:var(--ink);color:var(--bg)}
+@keyframes pop{0%{transform:scale(.8)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+.plate.in{animation:pop .3s both}
+@media (prefers-reduced-motion:reduce){.plate.in{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>かけ算の しきを かこう</h1>
+  <div class="stats">
+    <div class="score"><small>とけた</small><b id="solved">0</b><small>もん</small></div>
+    <div class="score"><small>れんぞく</small><b id="streak">0</b><small>もん</small></div>
+  </div>
+</header>
+<div class="card">
+  <p class="talk" id="talk"></p>
+  <div class="plates" id="plates" aria-label="お皿とくだもの"></div>
+  <div class="shiki">
+    <label for="a">しき</label>
+    <div class="col"><i class="bub b1">1つ分の 数</i><input id="a" inputmode="numeric" maxlength="2" aria-label="1つ分の数"></div>
+    <span>×</span>
+    <div class="col"><i class="bub b2">いくつ分</i><input id="b" inputmode="numeric" maxlength="2" aria-label="いくつ分"></div>
+    <span>=</span>
+    <div class="col"><i class="bub b3">ぜんぶの 数</i><input id="c" inputmode="numeric" maxlength="2" aria-label="ぜんぶの数"></div>
+  </div>
+  <div class="msg" id="msg" aria-live="polite"></div>
+  <div class="btns">
+    <button id="check">こたえあわせ</button>
+    <button id="next" class="alt">つぎのもんだい</button>
+  </div>
+  <div class="set">かけられる数のはんい:
+    <button data-r="5" class="on">2〜5</button>
+    <button data-r="9">2〜9</button>
+  </div>
+</div>
+</div>
+<script>
+const FOODS=[["🍅","ミニトマト"],["🍎","りんご"],["🍊","みかん"],["🍓","いちご"],["🍇","ぶどう"],["🍌","バナナ"],["🥕","にんじん"],["🌽","とうもろこし"],["🍆","なす"],["🥒","きゅうり"],["🍋","レモン"],["🍑","もも"],["🍐","なし"],["🥝","キウイ"],["🍒","さくらんぼ"],["🥦","ブロッコリー"],["🫑","ピーマン"],["🥔","じゃがいも"],["🍄","きのこ"],["🌶️","とうがらし"]];
+const $=id=>document.getElementById(id);
+let st={solved:0,streak:0,max:5,q:null,done:false};
+try{const s=JSON.parse(localStorage.getItem("kakezan")||"{}");if(s.solved)st.solved=s.solved}catch(e){}
+$("solved").textContent=st.solved;
+const rnd=(lo,hi)=>lo+Math.floor(Math.random()*(hi-lo+1));
+function positions(n){
+  if(n===1)return[[50,50]];
+  const out=[];const outer=n<=5?n:Math.ceil(n*0.6),inner=n-outer;
+  for(let i=0;i<outer;i++){const t=2*Math.PI*i/outer-Math.PI/2;out.push([50+31*Math.cos(t),50+31*Math.sin(t)])}
+  for(let i=0;i<inner;i++){const t=2*Math.PI*(i+.5)/inner;out.push([50+(inner===1?0:13)*Math.cos(t),50+(inner===1?0:13)*Math.sin(t)])}
+  return out;
+}
+function newQ(){
+  const f=FOODS[rnd(0,FOODS.length-1)];
+  const per=rnd(2,st.max),plates=rnd(2,st.max===5?6:9);
+  st.q={f,per,plates};st.done=false;
+  $("talk").innerHTML=`1さらに ${f[1]}が <em>${per}</em>こずつ。<em>${plates}</em>さら ぶんの ${f[1]}は ぜんぶで なんこ？<br>かけ算の しきに かいてみよう。`;
+  const box=$("plates");box.innerHTML="";
+  const pos=positions(per);
+  for(let p=0;p<plates;p++){
+    const d=document.createElement("div");d.className="plate in";d.style.animationDelay=(p*60)+"ms";
+    pos.forEach(([x,y])=>{const s=document.createElement("span");s.textContent=f[0];s.style.left=x+"%";s.style.top=y+"%";d.appendChild(s)});
+    box.appendChild(d);
+  }
+  ["a","b","c"].forEach(i=>$(i).value="");
+  $("msg").textContent="";$("msg").className="msg";
+  $("check").disabled=false;$("a").focus({preventScroll:true});
+}
+function check(){
+  if(st.done)return;
+  const {per,plates}=st.q,A=$("a").value.trim(),B=$("b").value.trim(),C=$("c").value.trim(),m=$("msg");
+  if(!A||!B||!C){m.className="msg ng";m.textContent="3つの □ に すうじを いれてね。";return}
+  const a=+A,b=+B,c=+C,total=per*plates;
+  if(a===per&&b===plates&&c===total){
+    st.done=true;st.solved++;st.streak++;
+    $("solved").textContent=st.solved;$("streak").textContent=st.streak;
+    try{localStorage.setItem("kakezan",JSON.stringify({solved:st.solved}))}catch(e){}
+    m.className="msg ok";m.textContent=`せいかい！ ${per} × ${plates} = ${total}。「つぎのもんだい」へ すすもう。`;
+    $("check").disabled=true;$("next").focus({preventScroll:true});
+  }else{
+    st.streak=0;$("streak").textContent=0;m.className="msg ng";
+    if(a===plates&&b===per&&c===total)m.textContent=`こたえは あっているよ。でも、1さらの かず × さらの かず の じゅんで かこう。`;
+    else if(a===per&&b===plates)m.textContent=`しきは あっているよ。こたえを もういちど かんがえてみよう。`;
+    else m.textContent=`おしい！ 1さらに なんこ？ なんさら ぶん？ を かぞえてみよう。`;
+  }
+}
+$("check").onclick=check;
+$("next").onclick=newQ;
+document.addEventListener("keydown",e=>{if(e.key==="Enter"){st.done?newQ():check()}});
+document.querySelectorAll(".set button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".set button").forEach(x=>x.classList.remove("on"));b.classList.add("on");
+  st.max=+b.dataset.r;newQ();
+});
+newQ();
+</script>
+</body>
+</html>
